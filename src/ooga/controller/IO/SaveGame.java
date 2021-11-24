@@ -4,31 +4,29 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import ooga.model.GameState;
+import org.json.JSONObject;
+
 
 public class SaveGame {
 
   private static int counter = 1;
   private static StringBuilder path = new StringBuilder();
-  private static String openingBracket = "{\n";
-  private static String colon = String.valueOf(':');
-  private static String comma = ",";
-  private static String titleLabel = "Title"; //must wrap all labels in double quotes
-  private static String playerLabel = "Player";
-  private static String requiredPelletsLabel = "RequiredPellets";
-  private static String optionalPelletsLabel = "OptionalPellets";
-  private static String powerUpsLabel = "PowerUps";
-  private static String numberOfLives = "NumberOfLives";
-  private static String opponentTypesLabel = "OpponentTypes";
-  private static String difficultyLevelLabel = "Difficulty-Label";
-  private static String wallMap = "WallMap";
-  private static String closingBracket = String.valueOf('}');
 
+  //json values
+  private static String Title;
+  private static String Player;
+  private static String requiredPellets;
+  private static String optionalPellets;
+  private static String powerUps;
+  private static String numberOfLives;
+  private static String opponentTypes;
+  private static String difficultyLevel;
+  private static String wallMap;
 
-
-  public static void saveGame(GameState game) throws IOException {
+  public static void saveGame() throws IOException {
 
     clearBuilders();
-    path.append("data/pac_man/user_file");
+    path.append("data/user_files/user_file");
     path.append("_"+ String.valueOf(counter));
     path.append(".json");
     counter++;
@@ -36,10 +34,23 @@ public class SaveGame {
 
     try {
       FileWriter fileToSave = new FileWriter(jsonFile);
-      fileToSave.write(String.valueOf(openingBracket));
-      fileToSave.write(String.valueOf(closingBracket));
-
-
+      JSONObject configObject = new JSONObject();
+      Title = "Test-Title";
+      configObject.put("Title", Title);
+      Player = "Test-Player";
+      configObject.put("Player", Player);
+      requiredPellets = "Test-RequiredPellets";
+      configObject.put("RequiredPellets", requiredPellets);
+      powerUps = "Test-Power-Ups";
+      configObject.put("PowerUps", powerUps);
+      numberOfLives = "Test-Number-Of-Lives";
+      configObject.put("NumberOfLives", numberOfLives);
+      opponentTypes = "Test-Opponent-Types";
+      configObject.put("OpponentTypes", opponentTypes);
+      difficultyLevel = "Test-Wall-Map";
+      configObject.put("WallMap", difficultyLevel);
+      fileToSave.write(String.valueOf(configObject));
+      fileToSave.close();
     } catch (IOException e) {
       System.out.println("SaveGame Exception");
     }
