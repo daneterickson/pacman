@@ -29,8 +29,6 @@ public class JsonParser implements JsonParserInterface {
   private static final String REQUIRED_VALUES_FILENAME = "RequiredValues";
 
   private Map<String, List<Position>> wallMap;
-  private int mapCols;
-  private int mapRows;
   private Map<String, Boolean> pelletInfo;
   private String player;
   private List<Consumer<Data>> vanillaGameDataConsumers;
@@ -94,8 +92,6 @@ public class JsonParser implements JsonParserInterface {
         wallMap.get(wallMapArr.getJSONArray(row).getString(col)).add(new Position(col, row));
       }
     }
-    mapCols = expectedNumCols;
-    mapRows = expectedNumRows;
   }
 
   private void checkWallMapForRequirements() throws InputMismatchException {

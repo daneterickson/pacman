@@ -35,18 +35,12 @@ public class SaveGame {
     try {
       FileWriter fileToSave = new FileWriter(jsonFile);
       JSONObject configObject = new JSONObject();
-      Title = "Test-Title";
-      configObject.put("Title", Title);
-      Player = "Test-Player";
+      Player = "Pac-Man"; //default setting until made dynamic
       configObject.put("Player", Player);
-      requiredPellets = "Test-RequiredPellets";
+      requiredPellets = "Test-RequiredPellets"; //assume it will be pellet types found in map; currently default
       configObject.put("RequiredPellets", requiredPellets);
-      powerUps = "Test-Power-Ups";
-      configObject.put("PowerUps", powerUps);
       numberOfLives = "Test-Number-Of-Lives";
       configObject.put("NumberOfLives", numberOfLives);
-      opponentTypes = "Test-Opponent-Types";
-      configObject.put("OpponentTypes", opponentTypes);
       difficultyLevel = "Test-Wall-Map";
       configObject.put("WallMap", difficultyLevel);
       fileToSave.write(String.valueOf(configObject));
