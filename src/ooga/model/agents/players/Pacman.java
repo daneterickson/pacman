@@ -14,6 +14,7 @@ public class Pacman extends AbstractAgent implements Consumable {
   public final static int DEAD_STATE = 0;
   public final static int ALIVE_STATE = 1;
   public final static int SUPER_STATE = 2;
+  public int myLives;
 
   private int myState;
   private MovementStrategyContext myMover;
@@ -22,6 +23,7 @@ public class Pacman extends AbstractAgent implements Consumable {
   public Pacman(int x, int y) {
     super(x, y);
     myState = ALIVE_STATE;
+    myLives = 3;
     myMover = new MovementStrategyContext(new Controllable());
   }
 
@@ -57,6 +59,8 @@ public class Pacman extends AbstractAgent implements Consumable {
 
   @Override
   public void agentReact() {
+    if (myLives != 0) myLives--;
+
   }
 
   @Override

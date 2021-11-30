@@ -1,0 +1,14 @@
+.speedSlider {
+  -fx-alignment: center;
+}
+
+.root {
+  -fx-alignment: center;
+}
+
+.game-buttons {
+  -fx-alignment: center;
+  -fx-spacing: 10;
+  -fx-padding: 10;
+}
+

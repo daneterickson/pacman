@@ -1,66 +1,103 @@
 package ooga.view.center.agents;
 
-import static ooga.controller.Controller.COLS;
-import static ooga.controller.Controller.ROWS;
 import static ooga.view.center.BoardView.BOARD_HEIGHT;
 import static ooga.view.center.BoardView.BOARD_WIDTH;
 
+import java.io.File;
 import java.util.function.Consumer;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import ooga.model.interfaces.Agent;
 
+/**
+ * Subclass of MovableView, which is a subclass of AgentView. GhostView creates a View Agent that
+ * shows the ghosts in the game.
+ *
+ * @author Dane Erickson
+ */
 public class GhostView extends MovableView {
 
-  public static final String GHOST_NAMES[] = {"blue","blinky","pinky","inky","clyde"};
-
+  public static final String GHOST_NAMES[] = {"blue", "blinky", "pinky", "inky",
+      "clyde"}; //make ghost state 0=dead, 1=blue, 2=blinky, etc
   public static final int CONSUMABLE_STATE = 1;
+  public static final String GHOST_PATH = "%s%s_right.png";
+  public static final String CHARGED_GHOST_PATH = "%s%s_right_charged.gif";
 
   private ImageView ghostImage;
   private Agent myAgent;
   private int ghostNum;
   private Consumer<Agent> updateGhost = newInfo -> updateAgent(newInfo);
+  private int numCols;
+  private int numRows;
+  private double gridWidth;
+  private double gridHeight;
+  private double imageBuffer;
+  private double verticalImageBuffer;
+  private double horizontalImageBuffer;
 
-  public GhostView (Agent ghost) { // make just 1 ghost (not 4) for first test?
-    myAgent = ghost;
-    ghostNum = 0; //TODO: Deal with Ghost Number
-    String path = String.format("%s%s_right.png", IMAGE_PATH, GHOST_NAMES[ghostNum]);
-    ghostViewSetup(path);
+  /**
+   * Constructor to create the GhostView object using the default image path for the ghost images
+   *
+   * @param ghost    is the Agent from the backend that corresponds to the front end Agent
+   * @param gridRows is the row position of the Agent
+   * @param gridCols is the column position of the Agent
+   */
+  public GhostView(Agent ghost, int gridRows,
+      int gridCols) { // make just 1 ghost (not 4) for first test?
+    this(ghost, String.format(GHOST_PATH, IMAGE_PATH, GHOST_NAMES[1]), gridRows, gridCols);
+//    this(ghost, String.format(GHOST_PATH, IMAGE_PATH, GHOST_NAMES[ghost.getState()]), gridRows, gridCols);
   }
 
-  public GhostView (Agent ghost, String imagePath) { // make just 1 ghost (not 4) for first test?
+  /**
+   * Constructor to create the GhostView object using the inputted image path for the ghost images
+   * from the preferences file.
+   *
+   * @param ghost     is the Agent from the backend that corresponds to the front end Agent
+   * @param imagePath is the inputted path from the preferences file for the Agent's image
+   * @param gridRows  is the row position of the Agent
+   * @param gridCols  is the column position of the Agent
+   */
+  public GhostView(Agent ghost, String imagePath, int gridRows,
+      int gridCols) { // make just 1 ghost (not 4) for first test?
     myAgent = ghost;
-    ghostNum = 0; //TODO: Deal with Ghost Number
+    ghostNum = 1; //TODO: Deal with Ghost Number
+    numRows = gridRows;
+    numCols = gridCols;
+    makeLayoutSettings();
     ghostViewSetup(imagePath);
+  }
+
+  private void makeLayoutSettings() {
+    gridWidth = BOARD_WIDTH / numCols;
+    gridHeight = BOARD_HEIGHT / numRows;
+    imageBuffer = IMAGE_BUFFER_FACTOR * Math.min(gridWidth, gridHeight);
+    verticalImageBuffer = (gridHeight - imageBuffer) / 2;
+    horizontalImageBuffer = (gridWidth - imageBuffer) / 2;
   }
 
   private void ghostViewSetup(String path) {
     ghostImage = makeGhostImage(path); //TODO: fix Ghost Number
     setImage(ghostImage);
-//    setX(myAgent.getPosition().getCoords()[0]);
-//    setY(myAgent.getPosition().getCoords()[1]);
-    ghostImage.setX(GRID_WIDTH * myAgent.getPosition().getCoords()[0] + HORIZONTAL_IMAGE_BUFFER);
-    ghostImage.setY(GRID_HEIGHT * myAgent.getPosition().getCoords()[1] + VERTICAL_IMAGE_BUFFER);
+    ghostImage.setX(gridWidth * myAgent.getPosition().getCoords()[0] + horizontalImageBuffer);
+    ghostImage.setY(gridHeight * myAgent.getPosition().getCoords()[1] + verticalImageBuffer);
     myAgent.addConsumer(updateGhost);
   }
 
   private ImageView makeGhostImage(String path) {
-    ImageView ghost = new ImageView(path);
-    ghost.setFitWidth(IMAGE_BUFFER);
-    ghost.setFitHeight(IMAGE_BUFFER);
+    ImageView ghost = new ImageView(new Image(new File(path).toURI().toString()));
+    ghost.setFitWidth(imageBuffer);
+    ghost.setFitHeight(imageBuffer);
     return ghost;
   }
 
   @Override
   protected void moveX(int x) {
-//    setX(x);
-    ghostImage.setX(BOARD_WIDTH/COLS * x + HORIZONTAL_IMAGE_BUFFER);
+    ghostImage.setX(gridWidth * x + horizontalImageBuffer);
   }
 
   @Override
   protected void moveY(int y) {
-//    setY(y);
-    ghostImage.setY(BOARD_HEIGHT/ROWS * y + VERTICAL_IMAGE_BUFFER);
+    ghostImage.setY(gridHeight * y + verticalImageBuffer);
   }
 
   @Override
@@ -72,9 +109,9 @@ public class GhostView extends MovableView {
   protected void updateOrientation(String orientation) {
     //TODO: account for case of user input image
     try {
-      ghostImage.setImage(new Image(String.format("%s%s_%s.png", IMAGE_PATH, GHOST_NAMES[ghostNum], orientation)));
-    }
-    catch (Exception e) { // Don't change the image because it's going up or down
+      ghostImage.setImage(
+          new Image(String.format("%s%s_%s.png", IMAGE_PATH, GHOST_NAMES[ghostNum], orientation)));
+    } catch (Exception e) { // Don't change the image because it's going up or down
       return;
     }
   }

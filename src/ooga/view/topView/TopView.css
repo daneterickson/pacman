@@ -1,0 +1,16 @@
+.root {
+  -fx-alignment: center;
+}
+
+.scoreLife {
+  -fx-alignment: center;
+  -fx-spacing: center;
+}
+
+.lives {
+  -fx-alignment: bottom-right;
+}
+
+.score {
+  -fx-alignment: bottom-left;
+}

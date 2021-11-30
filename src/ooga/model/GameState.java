@@ -19,7 +19,6 @@ public class GameState {
       GameBoard.class.getPackageName());
   private static final String TYPES_FILENAME = "types";
 
-
   private final int myRows;
   private final int myCols;
   private List<Agent> myOtherAgents;
@@ -32,6 +31,7 @@ public class GameState {
 
   public GameState(Data vanillaGameData)
       throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+    System.out.println(vanillaGameData.wallMap().toString());
     myRows = calculateDimension(vanillaGameData.wallMap(), 1) + 1;
     myCols = calculateDimension(vanillaGameData.wallMap(), 0) + 1;
     myOtherAgents = new ArrayList<>();

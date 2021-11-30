@@ -1,51 +1,93 @@
 package ooga.view.center.agents;
 
-import static ooga.controller.Controller.COLS;
-import static ooga.controller.Controller.ROWS;
 import static ooga.model.agents.players.Pacman.ALIVE_STATE;
 import static ooga.model.agents.players.Pacman.DEAD_STATE;
 import static ooga.model.agents.players.Pacman.SUPER_STATE;
 import static ooga.view.center.BoardView.BOARD_HEIGHT;
 import static ooga.view.center.BoardView.BOARD_WIDTH;
 
+import java.io.File;
 import java.util.function.Consumer;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import ooga.model.interfaces.Agent;
 
+/**
+ * Subclass of MovableView, which is a subclass of AgentView. PacView creates a View Agent that
+ * shows the Pac-Man in the game.
+ *
+ * @author Dane Erickson
+ */
 public class PacView extends MovableView {
 
   public static final String PAC_IMAGE = String.format("%spacman.png", IMAGE_PATH);
+  public static final String SUPER_PAC_IMAGE = String.format("%ssuper_pacman.png", IMAGE_PATH);
 
   private ImageView pacImage;
+  private Image originalImage;
   private Agent myAgent; //TODO: change to subclass of Agent
   private Consumer<Agent> updatePacMan = newInfo -> updateAgent(newInfo);
+  private int numCols;
+  private int numRows;
+  private double gridWidth;
+  private double gridHeight;
+  private double imageBuffer;
+  private double verticalImageBuffer;
+  private double horizontalImageBuffer;
 
-  public PacView(Agent pac) {
-    this(pac, PAC_IMAGE);
+  /**
+   * Constructor to create the PacView object using the default image path for the pac-man image
+   *
+   * @param pac      is the Agent from the backend that corresponds to the front end Agent
+   * @param gridRows is the row position of the Agent
+   * @param gridCols is the column position of the Agent
+   */
+  public PacView(Agent pac, int gridRows, int gridCols) {
+    this(pac, PAC_IMAGE, gridRows, gridCols);
   }
 
-  public PacView(Agent pac, String imagePath) {
+  /**
+   * Constructor to create the PacView object using the inputted image path for the pac-man image
+   * from the preferences file.
+   *
+   * @param pac       is the Agent from the backend that corresponds to the front end Agent
+   * @param imagePath is the inputted path from the preferences file for the Agent's image
+   * @param gridRows  is the row position of the Agent
+   * @param gridCols  is the column position of the Agent
+   */
+  public PacView(Agent pac, String imagePath, int gridRows, int gridCols) {
     myAgent = pac;
-    pacImage = new ImageView(imagePath);
-    pacImage.setFitWidth(IMAGE_BUFFER);
-    pacImage.setFitHeight(IMAGE_BUFFER);
+    numRows = gridRows;
+    numCols = gridCols;
+    makeLayoutSettings();
+    originalImage = new Image(new File(imagePath).toURI().toString());
+    pacImage = new ImageView(originalImage);
+    pacImage.setFitWidth(imageBuffer);
+    pacImage.setFitHeight(imageBuffer);
     setImage(pacImage);
-    pacImage.setX(GRID_WIDTH*myAgent.getPosition().getCoords()[0] + HORIZONTAL_IMAGE_BUFFER);
-    pacImage.setY(GRID_HEIGHT*myAgent.getPosition().getCoords()[1] + VERTICAL_IMAGE_BUFFER);
+    pacImage.setX(gridWidth * myAgent.getPosition().getCoords()[0] + horizontalImageBuffer);
+    pacImage.setY(gridHeight * myAgent.getPosition().getCoords()[1] + verticalImageBuffer);
 // add the Consumers to the List<Consumer<Integer>> in the model
     myAgent.addConsumer(updatePacMan);
   }
 
+  private void makeLayoutSettings() {
+    gridWidth = BOARD_WIDTH / numCols;
+    gridHeight = BOARD_HEIGHT / numRows;
+    imageBuffer = IMAGE_BUFFER_FACTOR * Math.min(gridWidth, gridHeight);
+    verticalImageBuffer = (gridHeight - imageBuffer) / 2;
+    horizontalImageBuffer = (gridWidth - imageBuffer) / 2;
+  }
+
   @Override
   protected void moveX(int x) {
-    pacImage.setX(BOARD_WIDTH / COLS * x + HORIZONTAL_IMAGE_BUFFER);
+    pacImage.setX(gridWidth * x + horizontalImageBuffer);
   }
 
   @Override
   protected void moveY(int y) {
 //    setY(y);
-    pacImage.setY(BOARD_HEIGHT / ROWS * y + VERTICAL_IMAGE_BUFFER);
+    pacImage.setY(gridHeight * y + verticalImageBuffer);
   }
 
   @Override
@@ -54,8 +96,9 @@ public class PacView extends MovableView {
     ImageView oldPac = pacImage;
     switch (state) {
       case DEAD_STATE -> pacImage.setVisible(false);
-      case ALIVE_STATE -> pacImage.setImage(pacImage.getImage());
-      case SUPER_STATE -> pacImage.setImage(new Image(String.format("%s%s", IMAGE_PATH, "clyde_right.png")));
+      case ALIVE_STATE -> pacImage.setImage(originalImage);
+      case SUPER_STATE -> pacImage.setImage(
+          new Image(new File(SUPER_PAC_IMAGE).toURI().toString()));
     }
     pacImage.setRotate(oldPac.getRotate());
   }

@@ -27,55 +27,65 @@ import ooga.model.util.Position;
 import ooga.model.interfaces.Agent;
 import ooga.view.center.agents.AgentView;
 import ooga.view.center.agents.WallView;
+import ooga.view.popups.ErrorPopups;
 
+/**
+ * Class that creates the BoardView in the front end, which is a Pane with all the AgentView objects
+ * placed in their corresponding location to create the Pac-Man board in the view.
+ *
+ * @author Dane Erickson
+ */
 public class BoardView {
+
   private static final String DEFAULT_RESOURCE_PACKAGE =
       BoardView.class.getPackageName() + ".resources.";
   private static final String TYPE_FILENAME = "types";
   private static final String CONSTRUCTORS_FILENAME = "constructors";
-  public static final double BOARD_WIDTH = 600;
-  public static final double BOARD_HEIGHT = 400;
-  public static final int GRID_SIZE = 1;
+  public static final double BOARD_WIDTH = 600.;
+  public static final double BOARD_HEIGHT = 400.;
   public static final Paint BOARD_COLOR = Color.BLACK;
 
   private VanillaGame myGame;
   private Controller myController;
   private Pane myBoardPane;
   private List<Consumer<AgentView>> boardConsumerList;
-  private double numRows;
-  private double numCols;
+  private int numRows;
+  private int numCols;
+  private String myLanguage;
 
-  public BoardView (VanillaGame game, Controller controller, UserPreferences userPreferences) {
+  /**
+   * Constructor to create a BoardView object based on UserPreferences from the inputted file and
+   * corresponding AgentView objects.
+   *
+   * @param game            is the model object that controls the back end Agents in the game
+   * @param controller      is the Controller object that communicates between the view and model
+   * @param userPreferences is the UserPreferences object with information from the uploaded files
+   */
+  public BoardView(VanillaGame game, Controller controller, UserPreferences userPreferences) {
     myGame = game;
     myController = controller;
     myBoardPane = new Pane();
     boardConsumerList = new ArrayList<>();
+    numRows = userPreferences.rows();
+    numCols = userPreferences.cols();
+    myLanguage = userPreferences.language();
     initiateBoard(userPreferences);
     myBoardPane.setMaxWidth(BOARD_WIDTH);
     myBoardPane.setMaxHeight(BOARD_HEIGHT);
-    myBoardPane.setBackground(new Background(new BackgroundFill(BOARD_COLOR, CornerRadii.EMPTY, Insets.EMPTY)));
+    myBoardPane.setBackground(
+        new Background(new BackgroundFill(BOARD_COLOR, CornerRadii.EMPTY, Insets.EMPTY)));
   }
 
   private void initiateBoard(UserPreferences userPreferences) {
-//    makeWalls(myParser.getWallMapPositions());
-//    int rows = myController.getRows();
-//    int cols = myController.getCols();
-//    for (int r=0; r<rows; r++) {
-//      for (int c=0; c<cols; c++) {
-//        Agent agent = myController.getAgent(x,y);
-//        String agentType = agent.getType();
-//        //TODO: reflection to create ItemView
-//        makeAgentView(agentType);
-//      }
-//    }
     for (String type : userPreferences.wallMap().keySet()) {
       for (Position p : userPreferences.wallMap().get(type)) {
 //        updateDimensions(p);
         AgentView agentView = null;
         ResourceBundle types = ResourceBundle.getBundle("ooga.view.center.resources.types");
         String realType = types.getString(type);
-        ResourceBundle constructors = ResourceBundle.getBundle(String.format("%s%s", DEFAULT_RESOURCE_PACKAGE, CONSTRUCTORS_FILENAME));
-        if(constructors.getString(type).equals("Color")) {
+        ResourceBundle constructors = ResourceBundle.getBundle(
+            String.format("%s%s", DEFAULT_RESOURCE_PACKAGE, CONSTRUCTORS_FILENAME));
+        if (constructors.getString(type).equals("Color")) {
           agentView = makeAgentViewColor(realType, p, userPreferences.colors().get(type));
         } else {
           agentView = makeAgentViewImage(realType, p, userPreferences.imagePaths().get(type));
@@ -104,9 +114,10 @@ public class BoardView {
     Agent agent = myGame.getBoard().getGameState().findAgent(position);
     try {
       Class<?> clazz = Class.forName(className);
-      return (AgentView) clazz.getDeclaredConstructor(Agent.class, List.class)
-          .newInstance(agent, rgb);
+      return (AgentView) clazz.getDeclaredConstructor(Agent.class, List.class, int.class, int.class)
+          .newInstance(agent, rgb, numRows, numCols);
     } catch (NoSuchMethodException | IllegalAccessException | InstantiationException | InvocationTargetException | ClassNotFoundException e) {
+//      new ErrorPopups(myLanguage).reflectionErrorPopup();
       return makeAgentView(type, position);
     }
   }
@@ -116,9 +127,11 @@ public class BoardView {
     Agent agent = myGame.getBoard().getGameState().findAgent(position);
     try {
       Class<?> clazz = Class.forName(className);
-      return (AgentView) clazz.getDeclaredConstructor(Agent.class, String.class)
-          .newInstance(agent, imagePath);
+      return (AgentView) clazz.getDeclaredConstructor(Agent.class, String.class, int.class,
+              int.class)
+          .newInstance(agent, imagePath, numRows, numCols);
     } catch (NoSuchMethodException | IllegalAccessException | InstantiationException | InvocationTargetException | ClassNotFoundException e) {
+//      new ErrorPopups(myLanguage).reflectionErrorPopup();
       return makeAgentView(type, position);
     }
   }
@@ -128,12 +141,12 @@ public class BoardView {
     Agent agent = myGame.getBoard().getGameState().findAgent(position);
     try {
       Class<?> clazz = Class.forName(className);
-      return (AgentView) clazz.getDeclaredConstructor(Agent.class)
-          .newInstance(agent);
+      return (AgentView) clazz.getDeclaredConstructor(Agent.class, int.class, int.class)
+          .newInstance(agent, numRows, numCols);
     } catch (NoSuchMethodException | IllegalAccessException | InstantiationException | InvocationTargetException | ClassNotFoundException e) {
-      //TODO: remove stack trace
-      e.printStackTrace();
-      return new WallView(new wall(0,0));
+//      new ErrorPopups(myLanguage).reflectionErrorPopup();
+      return new WallView(new wall(position.getCoords()[0], position.getCoords()[1]), numRows,
+          numCols);
     }
   }
 
@@ -142,6 +155,16 @@ public class BoardView {
 //    return numRows;
 //  }
 
-  public Node getBoardPane() { return myBoardPane; }
+  /**
+   * Getter method to get the Pane with all the AgentView objects placed in the correct locations.
+   * This is used in MainView to place the BoardView Pane in the center position of MainView's
+   * BorderPane.
+   *
+   * @return myBoardPane is a Node that has all the AgentView objects placed at the correct
+   * locations.
+   */
+  public Node getBoardPane() {
+    return myBoardPane;
+  }
 
 }

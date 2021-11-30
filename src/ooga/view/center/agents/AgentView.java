@@ -1,38 +1,42 @@
 package ooga.view.center.agents;
 
-import static ooga.controller.Controller.COLS;
-import static ooga.controller.Controller.ROWS;
-import static ooga.view.center.BoardView.BOARD_HEIGHT;
-import static ooga.view.center.BoardView.BOARD_WIDTH;
-
 import javafx.scene.Node;
 import ooga.model.interfaces.Agent;
 
+/**
+ * This is the super class for all the items placed on the Pac-Man Board screen in the view. Each
+ * subclass is a specific type of agent added to the screen and is created with reflection based on
+ * the Agent type. The two subclasses separate movable and stationary items, and the individual
+ * agents are subclasses of those two subclasses.
+ *
+ * @author Dane Erickson
+ */
 public abstract class AgentView {
 
-  public static final double GRID_WIDTH = BOARD_WIDTH / COLS;
-  public static final double GRID_HEIGHT = BOARD_HEIGHT / ROWS;
-  public static final double GRID_MIN = Math.min(GRID_HEIGHT,GRID_WIDTH);
-  public static final double IMAGE_BUFFER = GRID_MIN*0.9; // Images fill 90% of grid squares
-  public static final double VERTICAL_IMAGE_BUFFER = (GRID_HEIGHT-IMAGE_BUFFER)/2;
-  public static final double HORIZONTAL_IMAGE_BUFFER = (GRID_WIDTH-IMAGE_BUFFER)/2;
+  public static final double IMAGE_BUFFER_FACTOR = 0.9; // Images fill 90% of grid squares
 
   private Node myImage;
-  private int myX;
-  private int myY;
 
+  /**
+   * Abstract method that is called when the consumer for each agent is called with .accept(). This
+   * is overridden in MovableView and StationaryView depending on the action each agent should take
+   * with the consumer is called.
+   *
+   * @param agent is the Agent interface of the agent to be updated
+   */
   public abstract void updateAgent(Agent agent);
 
-  public Node getImage() { return myImage; }
+  /**
+   * Getter method to get the image for each AgentView
+   *
+   * @return Node myImage that is the image of the AgentView
+   */
+  public Node getImage() {
+    return myImage;
+  }
 
-  protected void setImage(Node newImage) { myImage = newImage; }
-
-  public int getX() { return myX; }
-
-//  protected void setX(int newX) { myX = newX; }
-
-  public int getY() { return myY; }
-
-//  protected void setY(int newY) { myY = newY; }
+  protected void setImage(Node newImage) {
+    myImage = newImage;
+  }
 
 }
