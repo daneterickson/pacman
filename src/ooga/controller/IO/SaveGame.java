@@ -37,7 +37,7 @@ public class SaveGame {
       JSONObject configObject = new JSONObject();
       Player = "Pac-Man"; //default setting until made dynamic
       configObject.put("Player", Player);
-      requiredPellets = "Test-RequiredPellets"; //assume it will be pellet types found in map; currently default
+      requiredPellets = "Test-RequiredPellets"; //assume it will be pellet types found in map; dcurrently default
       configObject.put("RequiredPellets", requiredPellets);
       numberOfLives = "Test-Number-Of-Lives";
       configObject.put("NumberOfLives", numberOfLives);
